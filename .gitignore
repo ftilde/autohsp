@@ -1,0 +1,4 @@
+*.json
+*.sh
+app
+token.txt
