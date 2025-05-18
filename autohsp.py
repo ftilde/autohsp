@@ -9,7 +9,8 @@ AUTH_TOKEN = os.getenv('AUTH_TOKEN')
 base_url = 'https://backbone-web-api.production.munster.delcom.nl/'
 
 standard_headers = {
-    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+    "User-Agent": "Android 7.1.2 - Brand: LGE - Model: Nexus 5",
+    #"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
     "Accept": "application/json, text/plain, */*",
     #{"Accept-Language": "en-US,en;q=0.5",
     "Accept-Encoding": "gzip, deflate, br, zstd",
@@ -26,7 +27,9 @@ standard_headers = {
     "TE": "trailers",
 }
 
-
+gate_codes = {
+    "Ballsporthalle": "8EF7A75C899B6BAE9296308CDB83530CE85232D06D53708ED0DAB180A06FABE2F0BD9BB6BB0420B655895072637A3DD9647F4EB97E8D65B250D80DC4CFED0FBB39B9A3BBF6E274966A13C0E1E35668E590579C46",
+}
 
 def request_get(path, params=None, extra_headers = None):
     url = base_url + path
@@ -78,6 +81,15 @@ def book(member_id, booking_id):
             }
 
     return request_post("participations", json=body)
+
+def scan(gate_name):
+    gate_code = gate_codes[gate_name]
+    body = {"type":"AccessControlRequestEntryByCode",
+            "isAsync":False,
+            "params":{"gateCode":gate_code},
+            }
+
+    return request_post("tasks", json=body)
 
 def fetch_participations(member_id, booking_id):
     filter = {
@@ -156,6 +168,7 @@ def try_book(member_id, booking_id):
         exit(1)
 
 auth = fetch_auth().json();
+print(auth)
 member_id=auth["id"]
 
 #tagId = 46
@@ -166,5 +179,7 @@ booking_id = find_course(productId, level_str)
 
 print("booking_id: " + str(booking_id))
 
-#print(try_book(member_id=member_id, booking_id=booking_id))
-print(fetch_participations(member_id=member_id, booking_id=booking_id).json())
+print(try_book(member_id=member_id, booking_id=booking_id))
+#print(fetch_participations(member_id=member_id, booking_id=booking_id).json())
+#scan_result = scan("Ballsporthalle")
+#print("scan: " + str(scan_result.json()))
