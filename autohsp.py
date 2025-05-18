@@ -3,8 +3,19 @@ import os
 import json
 from datetime import datetime, timedelta, timezone
 
+token_file = "tokens.json"
 
-AUTH_TOKEN = os.getenv('AUTH_TOKEN')
+def load_tokens(token_file):
+    with open(token_file) as f:
+        return json.load(f)
+
+def save_tokens(token_file, content):
+    with open(token_file, 'w') as f:
+        json.dump(content, f)
+
+
+tokens = load_tokens(token_file)
+AUTH_TOKEN = tokens['access_token']
 
 base_url = 'https://backbone-web-api.production.munster.delcom.nl/'
 
@@ -127,6 +138,15 @@ def fetch_courses(start, productId=None, tagId=None, range_days=7):
 
     return request_get("bookable-slots", params)
 
+def refresh_tokens(refresh_token):
+    json = {
+        "refresh_token": refresh_token
+    }
+
+    response = request_post("auth/token-refresh", json).json()
+    response['acquired'] = datetime.now(timezone.utc).isoformat()
+    return response
+
 def fetch_auth():
     params = {
         "cf": 0
@@ -167,9 +187,35 @@ def try_book(member_id, booking_id):
         print(book_response)
         exit(1)
 
+def keep_tokens_fresh(expire_time):
+    global tokens
+    global AUTH_TOKEN
+
+    refresh = False
+
+    acquired = tokens.get('acquired')
+    if acquired is None:
+        refresh = True
+    else:
+        token_age =  datetime.now(timezone.utc) - datetime.fromisoformat(acquired)
+        refresh = token_age > expire_time
+
+    if refresh:
+        print("refreshing tokens")
+        tokens = refresh_tokens(tokens['refresh_token'])
+        print(tokens)
+        AUTH_TOKEN = tokens['access_token']
+        save_tokens(token_file, tokens)
+    else:
+        print("not refreshing tokens (too young)")
+
+keep_tokens_fresh(timedelta(hours=24))
+
 auth = fetch_auth().json();
 print(auth)
 member_id=auth["id"]
+
+
 
 #tagId = 46
 productId = 467
@@ -179,7 +225,7 @@ booking_id = find_course(productId, level_str)
 
 print("booking_id: " + str(booking_id))
 
-print(try_book(member_id=member_id, booking_id=booking_id))
+#print(try_book(member_id=member_id, booking_id=booking_id))
 #print(fetch_participations(member_id=member_id, booking_id=booking_id).json())
 #scan_result = scan("Ballsporthalle")
 #print("scan: " + str(scan_result.json()))
