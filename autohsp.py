@@ -19,39 +19,41 @@ AUTH_TOKEN = tokens['access_token']
 
 base_url = 'https://backbone-web-api.production.munster.delcom.nl/'
 
-standard_headers = {
-    "User-Agent": "Android 7.1.2 - Brand: LGE - Model: Nexus 5",
-    #"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
-    "Accept": "application/json, text/plain, */*",
-    #{"Accept-Language": "en-US,en;q=0.5",
-    "Accept-Encoding": "gzip, deflate, br, zstd",
-    "Authorization": f"Bearer {AUTH_TOKEN}",
-    #"x-user-role-id": "...",
-    "x-custom-lang": "de",
-    "x-platform": "CF",
-    "Origin": "https://localhost",
-    #{"Connection": "keep-alive",
-    "Referer": "https://backbone-web-api.production.munster.delcom.nl/",
-    "Sec-Fetch-Dest": "empty",
-    "Sec-Fetch-Mode": "cors",
-    "Sec-Fetch-Site": "cross-site",
-    "TE": "trailers",
-}
-
 gate_codes = {
     "Ballsporthalle": "8EF7A75C899B6BAE9296308CDB83530CE85232D06D53708ED0DAB180A06FABE2F0BD9BB6BB0420B655895072637A3DD9647F4EB97E8D65B250D80DC4CFED0FBB39B9A3BBF6E274966A13C0E1E35668E590579C46",
 }
 
+def standard_headers():
+    return {
+        "User-Agent": "Android 7.1.2 - Brand: LGE - Model: Nexus 5",
+        #"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+        "Accept": "application/json, text/plain, */*",
+        #{"Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Authorization": f"Bearer {AUTH_TOKEN}",
+        #"x-user-role-id": "...",
+        "x-custom-lang": "de",
+        "x-platform": "CF",
+        "Origin": "https://localhost",
+        #{"Connection": "keep-alive",
+        "Referer": "https://backbone-web-api.production.munster.delcom.nl/",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "cross-site",
+        "TE": "trailers",
+    }
+
 def request_get(path, params=None, extra_headers = None):
     url = base_url + path
 
+    headers = standard_headers()
     if extra_headers:
-        headers = standard_headers + extra_headers
+        headers = headers + extra_headers
 
     response = requests.get(
         url,
         params=params,
-        headers=standard_headers,
+        headers=headers,
     )
 
     return response
@@ -59,13 +61,14 @@ def request_get(path, params=None, extra_headers = None):
 def request_post(path, json=None, extra_headers = None):
     url = base_url + path
 
+    headers = standard_headers()
     if extra_headers:
-        headers = standard_headers + extra_headers
+        headers = headers + extra_headers
 
     response = requests.post(
         url,
         json=json,
-        headers=standard_headers,
+        headers=headers,
     )
 
     return response
