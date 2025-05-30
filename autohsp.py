@@ -119,6 +119,10 @@ def fetch_participations(member_id, booking_id):
 
     return request_get("participations", params)
 
+def booking_participations(member_id, booking_id):
+    response = fetch_participations(member_id, booking_id).json()
+    return {d['bookingId']:d for d in response['data']}
+
 def datetime_to_str(dt):
     dt = dt.astimezone(timezone.utc)
     return dt.strftime('%Y-%m-%dT%H:%M:%S.000Z')
@@ -215,7 +219,7 @@ def keep_tokens_fresh(expire_time):
 keep_tokens_fresh(timedelta(hours=24))
 
 auth = fetch_auth().json();
-print(auth)
+#print(auth)
 member_id=auth["id"]
 
 
@@ -226,9 +230,20 @@ level_str = "Level 4"
 
 booking_id = find_course(productId, level_str)
 
-print("booking_id: " + str(booking_id))
+participations = booking_participations(member_id=member_id, booking_id=booking_id)
 
-#print(try_book(member_id=member_id, booking_id=booking_id))
-#print(fetch_participations(member_id=member_id, booking_id=booking_id).json())
+if booking_id:
+    if booking_id not in participations:
+        print("Booking new course with id: " + str(booking_id))
+        response = try_book(member_id=member_id, booking_id=booking_id)
+        print("Booked course: {}".format(response))
+
+        # Refresh participations to include the new course
+        participations = booking_participations(member_id=member_id, booking_id=booking_id)
+    else:
+        print("Not booking course with id {}. Already booked".format(booking_id))
+else:
+    print("No course to book found")
+
 #scan_result = scan("Ballsporthalle")
 #print("scan: " + str(scan_result.json()))
