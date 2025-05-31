@@ -19,7 +19,7 @@ def parse_duration(s):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--token-file', default="tokens.json")
+parser.add_argument('--token-file', default="tokens.json", help='Initial content: "tokenResponse" member of "delcom_auth" cookie. i.e. {"access_token": ..., "refresh_token":..., ...}')
 parser.add_argument('--max-checkin-wait-time', type=parse_duration, default="1d")
 parser.add_argument('--product-id', type=int, help="e.g. 467 for speed skating", required=True)
 parser.add_argument('--level', type=int, help="e.g. 4 for FF", required=True)
@@ -30,9 +30,19 @@ token_file = args.token_file
 product_id = args.product_id
 level_str = "Level {}".format(args.level)
 
+def camelToSnake(v):
+    out = ""
+    for c in v:
+        if c.isupper():
+            out += '_' + c.lower()
+        else:
+            out += c
+    return out
+
 def load_tokens(token_file):
     with open(token_file) as f:
-        return json.load(f)
+        # For some reason the auth response has keys in snake_case, but the cookie has them in camelCase. Sigh...
+        return {camelToSnake(k): v for k,v in json.load(f).items()}
 
 def save_tokens(token_file, content):
     with open(token_file, 'w') as f:
