@@ -5,6 +5,6 @@ Automatically book your favourite course without having to remember to book the 
 
 # Usage
 
-In short: Create an initial `tokens.json` file with contents of your browser session. Execute the script regularly (e.g. once a day) in a cron job with the correct arguments for your course. Done!
+In short: Create an initial `tokens.json` file with contents of your browser cookie (delcom_auth). Execute the script regularly (e.g. once a day) in a cron job with the correct arguments for your course. Done!
 
-See `./autohsp --help`.
+For more details see `./autohsp --help`.
