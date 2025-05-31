@@ -21,7 +21,7 @@ def parse_duration(s):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--token-file', default="tokens.json", help='Initial content: "tokenResponse" member of "delcom_auth" cookie. i.e. {"access_token": ..., "refresh_token":..., ...}')
+parser.add_argument('--token-file', default="tokens.json", help='Initial content: "tokenResponse" member of "delcom_auth" cookie. i.e. {"accessToken": ..., "refreshToken":..., ...}')
 parser.add_argument('--max-checkin-wait-time', type=parse_duration, default="1d")
 parser.add_argument('--product-id', type=int, help="e.g. 467 for speed skating", required=True)
 parser.add_argument('--level', type=int, help="e.g. 4 for FF", required=True)
