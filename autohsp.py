@@ -21,10 +21,14 @@ def parse_duration(s):
 parser = argparse.ArgumentParser()
 parser.add_argument('--token-file', default="tokens.json")
 parser.add_argument('--max-checkin-wait-time', type=parse_duration, default="1d")
+parser.add_argument('--product-id', type=int, help="e.g. 467 for speed skating", required=True)
+parser.add_argument('--level', type=int, help="e.g. 4 for FF", required=True)
 
 args = parser.parse_args()
 
 token_file = args.token_file
+product_id = args.product_id
+level_str = "Level {}".format(args.level)
 
 def load_tokens(token_file):
     with open(token_file) as f:
@@ -240,16 +244,9 @@ def keep_tokens_fresh(expire_time):
 keep_tokens_fresh(timedelta(hours=24))
 
 auth = fetch_auth().json();
-#print(auth)
 member_id=auth["id"]
 
-
-
-#tagId = 46
-productId = 467
-level_str = "Level 4"
-
-booking = find_course(productId, level_str)
+booking = find_course(product_id, level_str)
 booking_id = booking['id']
 
 participations = booking_participations(member_id=member_id, booking_id=booking_id)
