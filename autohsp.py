@@ -2,8 +2,29 @@ import requests
 import os
 import json
 from datetime import datetime, timedelta, timezone
+import argparse
+import time
 
-token_file = "tokens.json"
+def parse_duration(s):
+    amount = int(s[:-1])
+    match s[-1]:
+        case 'h':
+            return timedelta(hours=amount)
+        case 'd':
+            return timedelta(days=amount)
+        case 'm':
+            return timedelta(minutes=amount)
+        case o:
+            raise argparse.ArgumentTypeError('Unknown time unit "{}"'.format(o))
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--token-file', default="tokens.json")
+parser.add_argument('--max-checkin-wait-time', type=parse_duration, default="1d")
+
+args = parser.parse_args()
+
+token_file = args.token_file
 
 def load_tokens(token_file):
     with open(token_file) as f:
@@ -177,7 +198,7 @@ def find_course(productId, level_str):
                 #print(product["id"])
                 #print(booking["description"])
                 #print(booking["startDate"])
-                return booking["id"]
+                return booking
     except:
         print(courses)
         exit(1)
@@ -228,7 +249,8 @@ member_id=auth["id"]
 productId = 467
 level_str = "Level 4"
 
-booking_id = find_course(productId, level_str)
+booking = find_course(productId, level_str)
+booking_id = booking['id']
 
 participations = booking_participations(member_id=member_id, booking_id=booking_id)
 
@@ -242,8 +264,25 @@ if booking_id:
         participations = booking_participations(member_id=member_id, booking_id=booking_id)
     else:
         print("Not booking course with id {}. Already booked".format(booking_id))
+
+    if booking_id in participations:
+        start_date = booking['startDate']
+        start_date = datetime.fromisoformat(start_date)
+        time_left = start_date - datetime.now(timezone.utc)
+        if time_left < args.max_checkin_wait_time:
+            print("Sleeping {} until checkin".format(time_left))
+            time.sleep(time_left.total_seconds())
+
+            scan_result = scan("Ballsporthalle")
+            print("Checkin result: " + str(scan_result.json()))
+        else:
+            print("Not waiting for checkin: {}".format(time_left))
+
+
+    else:
+        print("Somehow we are still not participating after booking??")
+        print(booking_id)
+        print(participations)
 else:
     print("No course to book found")
 
-#scan_result = scan("Ballsporthalle")
-#print("scan: " + str(scan_result.json()))
