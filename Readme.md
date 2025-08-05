@@ -1,4 +1,4 @@
-# autoshp
+# autohsp
 
 Hochschulsport as if it's 2024 again.
 Automatically book your favourite course without having to remember to book the same course _every damn week_ via the stupid app. 
